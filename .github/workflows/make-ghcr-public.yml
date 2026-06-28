@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Set package public
         run: |
-          PKG="totvs-juridico-${{ matrix.component }}"
+          PKG="totvs-assistente-ti-${{ matrix.component }}"
           OWNER="${{ github.repository_owner }}"
           # User-owned packages (GHCR linked to personal account)
           gh api --method POST "/user/packages/container/${PKG}/visibility" \
