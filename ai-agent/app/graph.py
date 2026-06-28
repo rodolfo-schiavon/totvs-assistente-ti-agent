@@ -160,9 +160,9 @@ def _extract_final_text(messages: list) -> str:
     """Extrai texto final do agente principal (não relatórios internos do researcher)."""
     for m in reversed(messages):
         if isinstance(m, AIMessage) and m.content:
-            text = _extract_ai_text(m.content).strip()
-            if text and not _looks_like_tool_json(text) and not _looks_like_tool_xml(text) and not _is_internal_researcher_report(text) and not _is_tool_planning_chatter(text):
-                return _strip_tool_xml(text)
+            text = _strip_tool_xml(_extract_ai_text(m.content).strip())
+            if text and not _looks_like_tool_json(text) and not _is_internal_researcher_report(text) and not _is_tool_planning_chatter(text):
+                return text
 
     best_tool = ""
     for m in reversed(messages):
