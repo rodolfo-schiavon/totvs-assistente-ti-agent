@@ -1,0 +1,60 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# next.js
+**/.next/
+**/out/
+
+# production
+**/build
+**/dist
+
+# env
+.env
+.env*.local
+**/.env
+!**/.env.example
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# misc
+.DS_Store
+*.pem
+.vercel
+*.tsbuildinfo
+
+# prisma sqlite legacy
+prisma/*.db
+prisma/*.db-journal
+**/prisma/*.db
+**/prisma/*.db-journal
+
+# legacy monolith (superseded by frontend/ + backend/)
+/src/
+/prisma/
+/scripts/
+/Dockerfile.legacy
+/railway.toml.legacy
+package-lock.json
+/eslint.config.mjs
+/next.config.ts
+/next-env.d.ts
+/postcss.config.mjs
+/tsconfig.json
+
+# legacy monolith artifacts
+/data/
+backend/storage/
+
+# cursor / IDE
+.cursor/
+.playwright-mcp/
+
+# python venvs
+**/.venv/
+**/__pycache__/
+**/*.pyc

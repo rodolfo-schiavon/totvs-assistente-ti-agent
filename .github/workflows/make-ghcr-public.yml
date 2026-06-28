@@ -1,0 +1,29 @@
+name: Make GHCR Public
+
+on:
+  workflow_dispatch:
+
+permissions:
+  packages: write
+
+jobs:
+  public:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [frontend, backend, ai-agent]
+    steps:
+      - name: Set package public
+        run: |
+          PKG="totvs-juridico-${{ matrix.component }}"
+          OWNER="${{ github.repository_owner }}"
+          # User-owned packages (GHCR linked to personal account)
+          gh api --method POST "/user/packages/container/${PKG}/visibility" \
+            -f visibility=public && exit 0
+          # Fallback: org/user namespace path
+          gh api --method POST "/orgs/${OWNER}/packages/container/${PKG}/visibility" \
+            -f visibility=public && exit 0
+          gh api --method PATCH "/user/packages/container/${PKG}" \
+            -f visibility=public
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

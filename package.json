@@ -1,0 +1,11 @@
+{
+  "name": "dashboard-help-desk-monorepo",
+  "version": "2.1.0",
+  "private": true,
+  "scripts": {
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:reset": "docker compose down -v"
+  }
+}

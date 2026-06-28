@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dashboard
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dashboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/dashboard
+      PORT: 8000
+      API_SECRET: ${API_SECRET:-local-dev-api-secret-change-me}
+      AUTH_SECRET: ${AUTH_SECRET:-local-dev-auth-secret-min-32-chars-long!!}
+      AGENT_SERVICE_SECRET: ${AGENT_SERVICE_SECRET:-local-agent-secret}
+      CREDENTIALS_ENCRYPTION_KEY: ${CREDENTIALS_ENCRYPTION_KEY:-local-dev-encryption-key-32b}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ai-agent:
+    build:
+      context: ./ai-agent
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/dashboard
+      LEGAL_API_URL: http://backend:8000
+      BACKEND_INTERNAL_URL: http://backend:8000
+      API_SECRET: ${API_SECRET:-local-dev-api-secret-change-me}
+      AGENT_SERVICE_SECRET: ${AGENT_SERVICE_SECRET:-local-agent-secret}
+      AUTH_SECRET: ${AUTH_SECRET:-local-dev-auth-secret-min-32-chars-long!!}
+      FRONTEND_URL: http://localhost:3000
+      RATE_LIMIT_PER_MINUTE: "30"
+    depends_on:
+      - backend
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      AUTH_SECRET: ${AUTH_SECRET:-local-dev-auth-secret-min-32-chars-long!!}
+      API_URL: http://backend:8000
+      AI_AGENT_URL: http://ai-agent:8100
+      API_SECRET: ${API_SECRET:-local-dev-api-secret-change-me}
+      NEXT_PUBLIC_APP_NAME: Legal AI Workspace
+    depends_on:
+      - backend
+      - ai-agent
+
+volumes:
+  pgdata:

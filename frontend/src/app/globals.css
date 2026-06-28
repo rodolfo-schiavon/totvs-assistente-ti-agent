@@ -1,0 +1,316 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0c0e0c;
+  --color-foreground: #d4d4d4;
+  --color-foreground-muted: #9ca3af;
+  --color-card: #141614;
+  --color-card-hover: #1c1f1c;
+  --color-border: #2a2f2a;
+  --color-muted: #6b7280;
+  --color-accent: #22c55e;
+  --color-accent-dim: #16a34a;
+  --color-accent-glow: #4ade80;
+  --color-accent-muted: #86efac;
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-danger: #f87171;
+  --color-purple: #a3a3a3;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 70% 45% at 50% -15%, rgba(34, 197, 94, 0.08), transparent),
+    radial-gradient(ellipse 50% 35% at 100% 80%, rgba(55, 65, 55, 0.25), transparent);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f4640;
+  border-radius: 3px;
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(20, 22, 20, 0.95) 0%, rgba(16, 18, 16, 0.85) 100%);
+  border: 1px solid rgba(42, 47, 42, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.glow-accent {
+  box-shadow: 0 0 24px rgba(34, 197, 94, 0.12);
+}
+
+.text-accent {
+  color: var(--color-accent-glow);
+}
+
+.text-muted-ui {
+  color: var(--color-foreground-muted);
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.noc-mode {
+  font-size: 1.05rem;
+}
+
+.noc-mode .kpi-value {
+  font-size: 2.5rem;
+}
+
+input[type="date"],
+select {
+  color: var(--color-foreground);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+}
+
+/* ——— Gráficos Recharts: tooltip e legenda legíveis ——— */
+.recharts-tooltip-wrapper {
+  z-index: 100 !important;
+  pointer-events: none !important;
+}
+
+/* Remove retângulo branco no hover de pizza/donut */
+.recharts-tooltip-cursor {
+  display: none !important;
+}
+
+.recharts-default-tooltip {
+  background: #f8faf8 !important;
+  border: 2px solid rgba(34, 197, 94, 0.55) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6) !important;
+  padding: 10px 12px !important;
+  margin: 0 !important;
+}
+
+.recharts-tooltip-label {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  margin-bottom: 6px !important;
+}
+
+.recharts-tooltip-item-list {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.recharts-tooltip-item {
+  color: #111827 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 2px 0 !important;
+}
+
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value,
+.recharts-tooltip-item-separator {
+  color: #111827 !important;
+}
+
+.recharts-legend-wrapper {
+  width: 100% !important;
+  left: 0 !important;
+}
+
+.recharts-legend-item-text {
+  fill: #e5e7eb !important;
+  color: #e5e7eb !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.recharts-active-dot {
+  stroke: #fff !important;
+  stroke-width: 2 !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: #b8c0b8 !important;
+  font-size: 10px !important;
+}
+
+.recharts-label-list text {
+  fill: #b8c0b8 !important;
+  font-size: 10px !important;
+}
+
+.chart-tooltip-panel {
+  min-width: 140px;
+  max-width: 280px;
+  border-radius: 10px;
+  border: 2px solid rgba(34, 197, 94, 0.55);
+  background: #f8faf8;
+  padding: 10px 12px;
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.chart-tooltip-label {
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #d1d5db;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+}
+
+.chart-tooltip-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chart-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.chart-tooltip-row + .chart-tooltip-row {
+  margin-top: 6px;
+}
+
+.chart-tooltip-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.chart-tooltip-name {
+  flex: 1;
+  font-weight: 500;
+  color: #374151;
+}
+
+.chart-tooltip-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #111827;
+}
+
+.chart-tooltip-muted {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.chart-legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.chart-legend-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-foreground);
+  line-height: 1.2;
+}
+
+/* Hover nas fatias do donut */
+.recharts-pie-sector:focus {
+  outline: none;
+}
+
+.chart-card-body {
+  min-height: 200px;
+}
+
+.chart-with-legend {
+  position: relative;
+}
+
+/* ——— Chat do agente: markdown legível ——— */
+.agent-markdown {
+  width: 100%;
+  max-width: none;
+}
+
+.agent-markdown table {
+  font-size: 14px;
+}
+
+.agent-md-p {
+  margin-bottom: 1rem;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-foreground-muted);
+  word-break: break-word;
+}
+
+.agent-md-p:last-child {
+  margin-bottom: 0;
+}
+
+.agent-md-heading {
+  color: var(--color-foreground);
+  letter-spacing: -0.01em;
+}
+
+.agent-md-li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-foreground-muted);
+}
+
+.agent-md-li::marker {
+  color: var(--color-accent-glow);
+}
+
+.agent-md-list li strong {
+  display: inline-block;
+  margin-bottom: 0.15rem;
+  color: var(--color-foreground);
+}

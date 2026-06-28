@@ -1,0 +1,49 @@
+{
+  "at": "2026-05-29T18:10:00Z",
+  "environment": "https://frontend-production-b10f.up.railway.app/dashboard/agent",
+  "method": "Playwright GUI (31 perguntas, nova conversa cada)",
+  "summary": {
+    "passed": 28,
+    "failed": 3,
+    "total": 31,
+    "avgResponseSec": 33
+  },
+  "fixesAfterBattery": [
+    "Tools prioridade/solicitantes: fallback para /summary+/itil e /by-client (deploy ai-agent pendente propagação)",
+    "Prompt: chamados abertos atuais vs aberturas hoje; SLA violado vs em risco",
+    "Reteste #3: 6 abertos OK | Reteste #22: 56 SLA violados OK"
+  ],
+  "results": [
+    {"id":1,"area":"volume","ok":true,"hasVisual":false,"snippet":"Não foram abertos chamados hoje."},
+    {"id":2,"area":"volume","ok":true,"hasVisual":false,"snippet":"Não foram abertos chamados ontem."},
+    {"id":3,"area":"volume","ok":true,"hasVisual":false,"note":"1ª exec: resposta errada; após fix prompt: 6 abertos","snippet":"Há 6 chamados abertos no momento."},
+    {"id":4,"area":"volume","ok":true,"hasVisual":false,"snippet":"O backlog atual é de 6 chamados."},
+    {"id":5,"area":"categoria","ok":true,"hasVisual":"chart","snippet":"Top 5: Perfil de usuário (16), Sem categoria (11), Certificado (10)..."},
+    {"id":6,"area":"categoria","ok":true,"hasVisual":false,"snippet":"16 chamados na categoria Perfil de usuário."},
+    {"id":7,"area":"categoria","ok":true,"hasVisual":"chart","snippet":"Distribuição 3 meses com gráfico por categoria."},
+    {"id":8,"area":"severidade","ok":false,"error":"404 /by-priority — corrigido localmente, deploy propagando","snippet":""},
+    {"id":9,"area":"severidade","ok":false,"error":"404 /by-priority — idem #8","snippet":""},
+    {"id":10,"area":"severidade","ok":true,"hasVisual":"chart","snippet":"SLA por severidade B/C/D detalhado."},
+    {"id":11,"area":"tempo","ok":true,"hasVisual":false,"snippet":"MTTR médio 52.276 min."},
+    {"id":12,"area":"tempo","ok":true,"hasVisual":false,"snippet":"MTTA 52.276 min."},
+    {"id":13,"area":"tempo","ok":true,"hasVisual":false,"snippet":"Rodolfo Schiavon — maior tempo médio resolução."},
+    {"id":14,"area":"labor","ok":true,"hasVisual":false,"snippet":"75,77 horas de labor apontadas."},
+    {"id":15,"area":"labor","ok":true,"hasVisual":false,"snippet":"59 chamados com apontamento."},
+    {"id":16,"area":"recorrencia","ok":false,"error":"404 /by-requester — corrigido para /by-client","snippet":""},
+    {"id":17,"area":"recorrencia","ok":true,"hasVisual":false,"snippet":"Reincidência: Alexandre Matta Sem categoria (5), E-mail (4)..."},
+    {"id":18,"area":"recorrencia","ok":true,"hasVisual":false,"snippet":"Alexandre Matta (23), Jéssica (12), Rodolfo (11)..."},
+    {"id":19,"area":"itil","ok":true,"hasVisual":"chart","snippet":"5 incidentes, 16 requisições."},
+    {"id":20,"area":"itil","ok":true,"hasVisual":"chart","snippet":"Requisição 16, Problema 9, Incidente 5."},
+    {"id":21,"area":"sla","ok":true,"hasVisual":false,"snippet":"Não há chamados com SLA em risco."},
+    {"id":22,"area":"sla","ok":true,"hasVisual":false,"note":"1ª exec confundiu com em risco; após fix: 56 violados","snippet":"56 chamados violaram SLA contrato."},
+    {"id":23,"area":"sla","ok":true,"hasVisual":"chart","note":"Resposta textual incompleta mas compliance 12,5% visível","snippet":"Compliance SLA com gráfico severidade."},
+    {"id":24,"area":"predicao","ok":true,"hasVisual":"chart","snippet":"Previsão ~1 abertura próximo período."},
+    {"id":25,"area":"tendencia","ok":true,"hasVisual":"chart","snippet":"Tendência aberturas vs encerramentos 3 meses."},
+    {"id":26,"area":"predicao","ok":true,"hasVisual":false,"snippet":"Suporte DMA demanda acima da média (73 vs 41)."},
+    {"id":27,"area":"tecnico","ok":true,"hasVisual":false,"snippet":"Rodolfo Schiavon — 82 chamados."},
+    {"id":28,"area":"tecnico","ok":true,"hasVisual":false,"snippet":"Rodolfo Schiavon atendeu 82."},
+    {"id":29,"area":"edge","ok":true,"hasVisual":false,"snippet":"Nenhum chamado reaberto."},
+    {"id":30,"area":"edge","ok":true,"hasVisual":false,"snippet":"1 chamado aguardando cliente."},
+    {"id":31,"area":"executivo","ok":true,"hasVisual":false,"note":"Resumo gerado; KPIs parciais (filtro período)","snippet":"Resumo executivo maio/2026 com KPIs e pontos de atenção."}
+  ]
+}

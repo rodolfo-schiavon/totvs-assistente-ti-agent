@@ -1,0 +1,134 @@
+entities:
+  tickets:
+    description: Chamados de suporte importados da planilha Spiceworks (último batch).
+    source: ImportBatch + Ticket.rawJson
+    fields:
+      ticketNumber: Identificador do chamado
+      status: Status atual (aberto, encerrado, etc.)
+      priority: Prioridade / severidade interna (A-D)
+      openedAt: Data de abertura
+      closedAt: Data de fechamento
+      client: Cliente / organização
+      requester: Solicitante
+      technician: Técnico responsável
+      category: Categoria do chamado
+      subcategory: Subcategoria
+      slaStatus: SLA informado na importação
+      contractSlaStatus: SLA contrato calculado (ok, at_risk, breached)
+      resolutionMinutes: Tempo de resolução em minutos
+      responseMinutes: Tempo de primeira resposta
+    relationships:
+      client: Agrupa tickets por organização
+      technician: Agrupa por equipe/técnico
+      category: Agrupa por tipo de problema
+    metrics:
+      - volume_abertos
+      - volume_fechados
+      - mttr
+      - mtta
+      - sla_compliance
+      - backlog
+    tools:
+      - search_tickets
+      - get_ticket_by_number
+      - get_tickets_summary
+      - get_ticket_volume_by_period
+      - get_sla_risk_tickets
+      - get_sla_breaches
+    common_questions:
+      - Quantos chamados estão abertos?
+      - Quais chamados estão em atraso?
+      - Liste chamados críticos do mês
+
+  sla_contract:
+    description: Regras de SLA contratual (severidades A-D) aplicadas sobre tickets importados.
+    source: sla-contract.ts + Ticket.rawJson
+    fields:
+      prioridadeInterna: Severidade A, B, C ou D
+      contractSlaStatus: ok | at_risk | breached
+      resolutionMinutes: Tempo real de resolução
+    tools:
+      - get_sla_breaches
+      - get_sla_risk_tickets
+      - get_resolution_times
+      - get_itil_metrics
+    common_questions:
+      - Quais chamados violaram SLA?
+      - Qual equipe estourou SLA?
+      - Qual a taxa de compliance SLA?
+
+  clients:
+    description: Clientes e organizações com volume de chamados.
+    tools:
+      - get_top_clients
+      - get_customer_operational_summary
+      - get_tickets_by_category
+    common_questions:
+      - Quais clientes têm mais chamados?
+      - Qual cliente tem risco operacional?
+
+  technicians:
+    description: Técnicos e carga de trabalho.
+    tools:
+      - get_agent_workload
+      - get_resolution_times
+    common_questions:
+      - Qual técnico atendeu mais chamados?
+      - Qual equipe tem maior MTTR?
+
+  knowledge_documents:
+    description: Documentos da base de conhecimento (VFS RAG 3.0 em /legal-kb/).
+    source: KnowledgeDocument + LangGraph Store
+    tools: []
+    common_questions:
+      - O que diz a política de atendimento?
+      - Quais documentos existem na base?
+      - Qual a regra de escalonamento?
+
+routes:
+  documental:
+    tools: []
+  operational:
+    tools:
+      - search_tickets
+      - get_ticket_by_number
+      - get_tickets_summary
+      - get_sla_risk_tickets
+      - get_sla_breaches
+      - get_tickets_by_status
+      - get_tickets_by_category
+      - get_tickets_by_priority
+      - get_top_clients
+      - get_customer_operational_summary
+      - describe_data_catalog
+  hybrid:
+    tools:
+      - search_tickets
+      - get_sla_breaches
+      - get_sla_risk_tickets
+      - get_resolution_times
+      - get_tickets_summary
+      - describe_data_catalog
+  analytical:
+    tools:
+      - get_tickets_summary
+      - get_ticket_volume_by_period
+      - get_predictive_analysis_data
+      - get_agent_workload
+      - get_resolution_times
+      - get_itil_metrics
+      - get_sla_breaches
+      - get_top_clients
+      - get_customer_operational_summary
+      - get_ticket_metrics
+      - describe_data_catalog
+  report:
+    tools:
+      - get_tickets_summary
+      - get_ticket_volume_by_period
+      - get_itil_metrics
+      - get_sla_breaches
+      - get_agent_workload
+      - get_predictive_analysis_data
+      - get_ticket_metrics
+      - describe_data_catalog

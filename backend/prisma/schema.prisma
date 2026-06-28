@@ -1,0 +1,564 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  advogado
+  gerencia
+}
+
+enum LlmEnvironment {
+  production
+  test
+  fallback
+}
+
+enum GovernanceSeverity {
+  baixa
+  media
+  alta
+  critica
+}
+
+enum AlertStatus {
+  open
+  ack
+  resolved
+}
+
+enum RiskLevel {
+  baixo
+  medio
+  alto
+  critico
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  username           String   @unique
+  passwordHash       String
+  role               UserRole @default(gerencia)
+  department         String?
+  active             Boolean  @default(true)
+  mustChangePassword Boolean  @default(false)
+  passwordChangedAt  DateTime @default(now())
+  aiNoticeDismissed  Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  llmAudits            LlmConfigAuditLog[]
+  agentAudits          AgentAuditLog[]
+  conversations        AgentConversation[]
+  consents             UserConsent[]
+  llmObservability     LlmObservability[]
+  promptAnalytics      PromptAnalytics[]
+  promptSecurityEvents PromptSecurityEvent[]
+  promptQualityScores  PromptQualityScore[]
+  ragMetrics           RagMetrics[]
+  hallucinationEvents  HallucinationEvent[]
+  llmFeedback          LlmFeedback[]
+}
+
+model UserConsent {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consentVersion  String
+  acceptedAt      DateTime @default(now())
+  ipAddress       String?
+
+  @@unique([userId, consentVersion])
+}
+
+model WorkspaceSettings {
+  id             String   @id @default("default")
+  retentionDays  Int      @default(90)
+  consentVersion String   @default("1.0")
+  updatedAt      DateTime @updatedAt
+}
+
+model LlmProviderConfig {
+  id              String         @id @default(cuid())
+  provider        String
+  displayName     String
+  model           String
+  apiKeyEnc       String
+  baseUrl         String?
+  organizationId  String?
+  projectId       String?
+  deploymentName  String?
+  temperature     Float          @default(0.2)
+  maxTokens       Int            @default(16384)
+  isDefault       Boolean        @default(false)
+  isFallback      Boolean        @default(false)
+  environment     LlmEnvironment @default(production)
+  active          Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  audits LlmConfigAuditLog[]
+
+  @@unique([provider])
+}
+
+model LlmConfigAuditLog {
+  id        String   @id @default(cuid())
+  configId  String?
+  config    LlmProviderConfig? @relation(fields: [configId], references: [id], onDelete: SetNull)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+model AgentConversation {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String?
+  analysisType String?
+  tenantId     String    @default("default")
+  clientIp     String?
+  userAgent    String?
+  channel      String    @default("web")
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  audits              AgentAuditLog[]
+  messages            AgentMessage[]
+  metrics             ConversationMetrics?
+  compliance          ConversationCompliance?
+  conversationAudits  ConversationAudit[]
+  conversationViews   ConversationView[]
+  securityEvents      ConversationSecurityEvent[]
+  riskAnalyses        ConversationRiskAnalysis[]
+}
+
+model AgentMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String
+  content        String   @db.Text
+  usageJson      String?
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model AgentAuditLog {
+  id             String   @id @default(cuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversationId String?
+  conversation   AgentConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  action         String   @default("chat")
+  analysisType   String?
+  question       String?
+  toolsCalled    String?
+  modelUsed      String?
+  latencyMs      Int?
+  error          String?
+  createdAt      DateTime @default(now())
+}
+
+model KnowledgeBase {
+  id          String   @id @default(cuid())
+  name        String   @default("Base organizacional")
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  documents KnowledgeDocument[]
+}
+
+model KnowledgeDocument {
+  id               String   @id @default(cuid())
+  knowledgeBaseId  String
+  knowledgeBase    KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+  title            String
+  mimeType         String
+  storageKey       String
+  byteSize         Int      @default(0)
+  status           String   @default("pending")
+  error            String?
+  uploadedBy       String?
+  extractedPreview String?  @db.Text
+  extractedText    String?  @db.Text
+  vfsSyncStatus    String   @default("pending")
+  vfsSyncError     String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  jobs IngestionJob[]
+
+  @@index([knowledgeBaseId, status])
+}
+
+model IngestionJob {
+  id         String   @id @default(cuid())
+  documentId String
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  status     String   @default("pending")
+  error      String?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime @default(now())
+}
+
+model AgentMessageAttachment {
+  id               String   @id @default(cuid())
+  messageId        String?
+  conversationId   String?
+  uploadedByUserId String?
+  storageKey       String
+  mimeType         String
+  fileName         String
+  byteSize         Int      @default(0)
+  extractedText    String?  @db.Text
+  extractionStatus String   @default("pending")
+  extractionError  String?
+  thumbnailKey     String?
+  createdAt        DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([uploadedByUserId])
+}
+
+model LlmObservability {
+  id               String   @id @default(cuid())
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversationId   String?
+  messageId        String?
+  model            String?
+  provider         String?
+  analysisType     String?
+  route            String?
+  inputTokens      Int      @default(0)
+  outputTokens     Int      @default(0)
+  totalTokens      Int      @default(0)
+  estimatedCostUsd Float    @default(0)
+  latencyMs        Int?
+  status           String   @default("success")
+  toolsJson        String?
+  error            String?
+  createdAt        DateTime @default(now())
+
+  qualityScore PromptQualityScore?
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([conversationId])
+}
+
+model PromptAnalytics {
+  id               String   @id @default(cuid())
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversationId   String?
+  promptHash       String
+  promptNormalized String?  @db.Text
+  promptCategory   String?
+  analysisType     String?
+  containsPii      Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([promptHash])
+  @@index([conversationId])
+}
+
+model PromptSecurityEvent {
+  id             String             @id @default(cuid())
+  userId         String?
+  user           User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversationId String?
+  severity       GovernanceSeverity @default(media)
+  pattern        String?
+  blocked        Boolean            @default(false)
+  promptSnippet  String?
+  createdAt      DateTime           @default(now())
+
+  @@index([severity, createdAt])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+model PromptQualityScore {
+  id              String            @id @default(cuid())
+  userId          String?
+  user            User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversationId  String?
+  observabilityId String?           @unique
+  observability   LlmObservability? @relation(fields: [observabilityId], references: [id], onDelete: SetNull)
+  score           Int               @default(0)
+  clarity         Int?
+  context         Int?
+  ragUsage        Int?
+  toolUsage       Int?
+  detailsJson     String?
+  createdAt       DateTime          @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+model RagMetrics {
+  id              String   @id @default(cuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversationId  String?
+  docsRetrieved   Int      @default(0)
+  chunksRetrieved Int      @default(0)
+  avgSimilarity   Float?
+  fallbackUsed    Boolean  @default(false)
+  route           String?
+  vfsFilesCount   Int      @default(0)
+  success         Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+model HallucinationEvent {
+  id             String    @id @default(cuid())
+  userId         String?
+  user           User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversationId String?
+  riskScore      Int       @default(0)
+  riskLevel      RiskLevel @default(baixo)
+  evidenceJson   String?
+  createdAt      DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([riskLevel, createdAt])
+}
+
+model LlmCostMetric {
+  id           String   @id @default(cuid())
+  metricDate   DateTime @db.Date
+  metricKey    String
+  userId       String?
+  userRole     String?
+  model        String?
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  totalTokens  Int      @default(0)
+  costUsd      Float    @default(0)
+  turnCount    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([metricDate, metricKey])
+  @@index([metricDate, metricKey])
+}
+
+model LlmFeedback {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messageId      String?
+  conversationId String?
+  rating         Int?
+  thumbs         String?
+  comment        String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([conversationId])
+}
+
+model LlmAlert {
+  id             String             @id @default(cuid())
+  alertType      String
+  severity       GovernanceSeverity @default(media)
+  title          String
+  description    String?            @db.Text
+  status         AlertStatus        @default(open)
+  metadataJson   String?
+  acknowledgedAt DateTime?
+  resolvedAt     DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([status, createdAt])
+  @@index([severity, createdAt])
+  @@index([createdAt])
+}
+
+model AiGovernanceMetric {
+  id          String   @id @default(cuid())
+  period      String
+  metricKey   String
+  valueNumber Float?
+  valueJson   String?
+  computedAt  DateTime @default(now())
+
+  @@unique([period, metricKey])
+  @@index([period, metricKey])
+}
+
+model LgpdRequest {
+  id          String    @id @default(cuid())
+  userId      String?
+  requestType String
+  status      String    @default("pending")
+  notes       String?   @db.Text
+  requestedBy String?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model ConversationMetrics {
+  id                 String            @id @default(cuid())
+  conversationId     String            @unique
+  conversation       AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  tenantId           String            @default("default")
+  userId             String
+  title              String?
+  department         String?
+  userRole           String?
+  messageCount       Int               @default(0)
+  inputTokens        Int               @default(0)
+  outputTokens       Int               @default(0)
+  totalTokens        Int               @default(0)
+  estimatedCostUsd   Float             @default(0)
+  primaryModel       String?
+  ragUsed            Boolean           @default(false)
+  toolsUsed          Boolean           @default(false)
+  documentsUsed      Int               @default(0)
+  negativeFeedback   Boolean           @default(false)
+  avgFeedbackRating  Float?
+  riskLevel          RiskLevel         @default(baixo)
+  durationMs         Int?
+  status             String            @default("active")
+  searchText         String?           @db.Text
+  lastActivityAt     DateTime          @default(now())
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([lastActivityAt])
+  @@index([userId, lastActivityAt])
+  @@index([tenantId, lastActivityAt])
+  @@index([department])
+  @@index([status])
+}
+
+model ConversationAudit {
+  id             String             @id @default(cuid())
+  conversationId String?
+  conversation   AgentConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  actorUserId    String?
+  action         String
+  detailsJson    String?
+  createdAt      DateTime           @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([createdAt])
+}
+
+model ConversationExport {
+  id             String   @id @default(cuid())
+  actorUserId    String?
+  format         String
+  section        String?
+  filtersJson    String?
+  recordCount    Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model ConversationView {
+  id             String            @id @default(cuid())
+  conversationId String
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  viewerUserId   String
+  viewerRole     String?
+  createdAt      DateTime          @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([viewerUserId, createdAt])
+}
+
+model ConversationSecurityEvent {
+  id             String             @id @default(cuid())
+  conversationId String?
+  conversation   AgentConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  messageId      String?
+  eventType      String
+  severity       GovernanceSeverity @default(media)
+  pattern        String?
+  detailsJson    String?
+  createdAt      DateTime           @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([severity, createdAt])
+}
+
+model ConversationSearchHistory {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  query       String
+  mode        String   @default("hybrid")
+  filtersJson String?
+  resultCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorUserId, createdAt])
+}
+
+model ConversationRiskAnalysis {
+  id             String             @id @default(cuid())
+  conversationId String?
+  conversation   AgentConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  messageId      String?
+  riskType       String
+  riskLevel      RiskLevel          @default(baixo)
+  evidenceJson   String?
+  createdAt      DateTime           @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([riskLevel, createdAt])
+}
+
+model ConversationCompliance {
+  id             String            @id @default(cuid())
+  conversationId String            @unique
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  anonymized     Boolean           @default(false)
+  masked         Boolean           @default(false)
+  deletedAt      DateTime?
+  retentionDays  Int?
+  notes          String?           @db.Text
+  updatedAt      DateTime          @updatedAt
+  createdAt      DateTime          @default(now())
+}
+
+model ConversationMessageEmbedding {
+  id             String   @id @default(cuid())
+  messageId      String   @unique
+  conversationId String
+  model          String   @default("text-embedding-3-small")
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+}

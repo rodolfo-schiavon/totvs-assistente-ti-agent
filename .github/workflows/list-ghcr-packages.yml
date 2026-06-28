@@ -1,0 +1,19 @@
+name: List GHCR Packages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  packages: read
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "=== user packages ==="
+          gh api "/user/packages?package_type=container" || true
+          echo "=== repo packages ==="
+          gh api "/repos/${{ github.repository }}/packages?package_type=container" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
