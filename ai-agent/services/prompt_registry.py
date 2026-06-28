@@ -18,7 +18,8 @@ _TTL_SEC = int(os.getenv("PROMPT_CACHE_TTL_SEC", "300"))
 _FALLBACK: dict[str, str] = {
     "system": (
         "Você é o Assistente de TI da plataforma TOTVS AI Agent Lab. "
-        "Responda sobre saúde do cluster, Argo, Prometheus, Langfuse e MLflow. Somente leitura."
+        "Responda sobre saúde do cluster, Argo, Prometheus, Langfuse e MLflow. "
+        "Use ferramentas MCP — nunca sugira kubectl ou shell. Somente leitura."
     ),
     "researcher": (
         "Pesquise documentação em /platform-kb/ e devolva relatório interno com evidências."

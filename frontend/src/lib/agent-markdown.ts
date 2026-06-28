@@ -1,6 +1,16 @@
 const DOC_CITATION_RE = /\[Doc:\s*([^\]]+)\]/gi;
 const VFS_INLINE_RE = /`?\/platform-kb\/[^`\s,)]+`?(?:\s*,?\s*linha\s+\d+)?/gi;
 const TABLE_BLOCK_RE = /(^|\n)(\|.+\|\n\|[-:\s|]+\|\n(?:\|.+\|\n?)+)/g;
+const TOOL_XML_BLOCK_RE = /<function_calls>[\s\S]*?<\/function_calls>/gi;
+const TOOL_XML_TAG_RE = /<\/?(?:invoke|parameter|function_calls)[^>]*>/gi;
+
+export function stripToolXml(content: string): string {
+  return content
+    .replace(TOOL_XML_BLOCK_RE, "")
+    .replace(TOOL_XML_TAG_RE, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
 export function extractDocCitations(content: string): string[] {
   const found = new Set<string>();
@@ -12,12 +22,12 @@ export function extractDocCitations(content: string): string[] {
 }
 
 export function stripDocCitations(content: string): string {
-  return content
-    .replace(DOC_CITATION_RE, "")
-    .replace(VFS_INLINE_RE, "")
-    .replace(/\s*\(\s*conforme\s*\)/gi, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  return stripToolXml(
+    content
+      .replace(DOC_CITATION_RE, "")
+      .replace(VFS_INLINE_RE, "")
+      .replace(/\s*\(\s*conforme\s*\)/gi, "")
+  );
 }
 
 function protectMarkdownTables(text: string): { text: string; tables: string[] } {

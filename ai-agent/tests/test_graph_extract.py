@@ -7,7 +7,9 @@ from app.graph import (
     _is_internal_researcher_report,
     _is_tool_planning_chatter,
     _looks_like_tool_json,
+    _looks_like_tool_xml,
     _pick_response_text,
+    _strip_tool_xml,
 )
 
 
@@ -56,3 +58,23 @@ def test_extract_final_text_skips_researcher_report():
         ToolMessage(content=report, tool_call_id="1"),
     ]
     assert _extract_final_text(messages) == ""
+
+
+def test_looks_like_tool_xml():
+    xml = (
+        "Comando sugerido:\n<function_calls>\n"
+        "<invoke name=\"task\">\n<parameter name=\"x\">kubectl get pods</parameter>\n"
+        "</invoke>\n</function_calls>"
+    )
+    assert _looks_like_tool_xml(xml) is True
+    assert _is_tool_planning_chatter(xml) is True
+
+
+def test_extract_final_text_strips_tool_xml():
+    xml = (
+        "Status OK.\n<function_calls><invoke name=\"x\">"
+        "<parameter>foo</parameter></invoke></function_calls>"
+    )
+    messages = [HumanMessage(content="q"), AIMessage(content=xml)]
+    assert "<function_calls>" not in _extract_final_text(messages)
+    assert _extract_final_text(messages).startswith("Status OK.")

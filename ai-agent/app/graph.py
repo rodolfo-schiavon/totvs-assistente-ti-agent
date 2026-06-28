@@ -65,12 +65,27 @@ def _looks_like_tool_json(text: str) -> bool:
     return t.startswith("{") and ("tool" in t.lower() or "function" in t.lower())
 
 
+_TOOL_XML_BLOCK_RE = re.compile(r"<function_calls>.*?</function_calls>", re.I | re.DOTALL)
+_TOOL_XML_TAG_RE = re.compile(r"</?(?:invoke|parameter|function_calls)[^>]*>", re.I)
+
+
+def _looks_like_tool_xml(text: str) -> bool:
+    t = text.strip().lower()
+    return "<function_calls>" in t or "<invoke" in t or "</parameter>" in t
+
+
+def _strip_tool_xml(text: str) -> str:
+    cleaned = _TOOL_XML_BLOCK_RE.sub("", text)
+    cleaned = _TOOL_XML_TAG_RE.sub("", cleaned)
+    return re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+
+
 def _is_tool_planning_chatter(text: str) -> bool:
     """Raciocínio intermediário de tool-calling — não deve ir para o usuário."""
     t = text.strip().lower()
     if not t:
         return True
-    if _looks_like_tool_json(text):
+    if _looks_like_tool_json(text) or _looks_like_tool_xml(text):
         return True
     markers = (
         "deixe-me ",
@@ -146,8 +161,8 @@ def _extract_final_text(messages: list) -> str:
     for m in reversed(messages):
         if isinstance(m, AIMessage) and m.content:
             text = _extract_ai_text(m.content).strip()
-            if text and not _looks_like_tool_json(text) and not _is_internal_researcher_report(text) and not _is_tool_planning_chatter(text):
-                return text
+            if text and not _looks_like_tool_json(text) and not _looks_like_tool_xml(text) and not _is_internal_researcher_report(text) and not _is_tool_planning_chatter(text):
+                return _strip_tool_xml(text)
 
     best_tool = ""
     for m in reversed(messages):
