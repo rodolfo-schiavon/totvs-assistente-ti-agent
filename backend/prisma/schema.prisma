@@ -63,6 +63,7 @@ model User {
   ragMetrics           RagMetrics[]
   hallucinationEvents  HallucinationEvent[]
   llmFeedback          LlmFeedback[]
+  pendingActions       PendingAction[]
 }
 
 model UserConsent {
@@ -551,6 +552,36 @@ model ConversationCompliance {
   notes          String?           @db.Text
   updatedAt      DateTime          @updatedAt
   createdAt      DateTime          @default(now())
+}
+
+enum PendingActionStatus {
+  pending
+  approved
+  rejected
+  executed
+  failed
+  expired
+}
+
+model PendingAction {
+  id             String              @id @default(cuid())
+  userId         String
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationId String?
+  actionType     String
+  paramsJson     String              @db.Text
+  summary        String
+  risk           String              @default("medium")
+  status         PendingActionStatus @default(pending)
+  resultJson     String?             @db.Text
+  error          String?
+  expiresAt      DateTime
+  approvedAt     DateTime?
+  executedAt     DateTime?
+  createdAt      DateTime            @default(now())
+
+  @@index([userId, status])
+  @@index([expiresAt])
 }
 
 model ConversationMessageEmbedding {

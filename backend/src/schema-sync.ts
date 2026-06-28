@@ -573,6 +573,49 @@ async function ensureGovernanceSchema() {
   await prisma.$executeRawUnsafe(`
     CREATE UNIQUE INDEX IF NOT EXISTS mv_governance_daily_day_idx ON mv_governance_daily (day);
   `);
+
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      CREATE TYPE "PendingActionStatus" AS ENUM ('pending', 'approved', 'rejected', 'executed', 'failed', 'expired');
+    EXCEPTION WHEN duplicate_object THEN NULL;
+    END $$;
+  `);
+
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "PendingAction" (
+      "id" TEXT NOT NULL,
+      "userId" TEXT NOT NULL,
+      "conversationId" TEXT,
+      "actionType" TEXT NOT NULL,
+      "paramsJson" TEXT NOT NULL,
+      "summary" TEXT NOT NULL,
+      "risk" TEXT NOT NULL DEFAULT 'medium',
+      "status" "PendingActionStatus" NOT NULL DEFAULT 'pending',
+      "resultJson" TEXT,
+      "error" TEXT,
+      "expiresAt" TIMESTAMP(3) NOT NULL,
+      "approvedAt" TIMESTAMP(3),
+      "executedAt" TIMESTAMP(3),
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PendingAction_pkey" PRIMARY KEY ("id")
+    );
+  `);
+  await prisma.$executeRawUnsafe(`
+    CREATE INDEX IF NOT EXISTS "PendingAction_userId_status_idx" ON "PendingAction"("userId", "status");
+  `);
+  await prisma.$executeRawUnsafe(`
+    CREATE INDEX IF NOT EXISTS "PendingAction_expiresAt_idx" ON "PendingAction"("expiresAt");
+  `);
+  await prisma.$executeRawUnsafe(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'PendingAction_userId_fkey'
+      ) THEN
+        ALTER TABLE "PendingAction" ADD CONSTRAINT "PendingAction_userId_fkey"
+        FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+      END IF;
+    END $$;
+  `);
 }
 
 /** Migra enum legado (lawyer, legal_assistant, readonly) para admin | advogado | gerencia. */

@@ -9,6 +9,7 @@ import { authRoutes } from "./routes/auth";
 import { usersRoutes } from "./routes/users";
 import { llmAdminRoutes } from "./routes/llm-admin";
 import { internalRoutes } from "./routes/internal";
+import { agentActionsRoutes, internalActionsRoutes } from "./routes/agent-actions";
 import { agentAuditRoutes } from "./routes/agent-audit";
 import { agentConversationRoutes } from "./routes/agent-conversations";
 import { knowledgeRoutes, agentAttachmentRoutes } from "./routes/knowledge";
@@ -97,6 +98,8 @@ async function main() {
   await app.register(usersRoutes);
   await app.register(llmAdminRoutes);
   await app.register(internalRoutes);
+  await app.register(internalActionsRoutes);
+  await app.register(agentActionsRoutes);
   await app.register(governanceIngestRoutes);
   await app.register(agentAuditRoutes);
   await app.register(agentConversationRoutes);

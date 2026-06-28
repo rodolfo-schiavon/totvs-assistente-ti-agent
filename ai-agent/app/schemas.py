@@ -25,6 +25,15 @@ class ResponseSource(BaseModel):
     documents: list[str] = Field(default_factory=list)
 
 
+class PendingActionSpec(BaseModel):
+    id: str
+    action_type: str
+    summary: str
+    risk: str = "medium"
+    status: str = "pending"
+    expires_at: str | None = None
+
+
 class MixedResponse(BaseModel):
     type: Literal["mixed_response"] = "mixed_response"
     markdown: str
@@ -36,6 +45,7 @@ class MixedResponse(BaseModel):
     follow_ups: list[str] = Field(default_factory=list)
     data_limitations: str | None = None
     route: str | None = None
+    pending_actions: list[PendingActionSpec] = Field(default_factory=list)
 
 
 class TokenUsageTurn(BaseModel):

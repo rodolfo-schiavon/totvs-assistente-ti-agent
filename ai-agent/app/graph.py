@@ -14,6 +14,7 @@ from services.prompt_registry import (
     build_main_system_prompt,
     build_researcher_system_prompt,
 )
+from services.action_broker_client import action_tools_for_route
 from services.mcp_client import build_mcp_preflight_context, mcp_tools_for_route
 from app.llm_provider import build_llm
 from app.schemas import MixedResponse, TokenUsageTurn
@@ -406,11 +407,15 @@ async def build_agent(
     route: str | None = None,
     knowledge_mode: bool = False,
     analysis_type: str = "geral",
+    user_id: str | None = None,
+    conversation_id: str | None = None,
 ):
     cfg = llm_cfg or await fetch_active_llm()
     primary = cfg.get("primary") or cfg
     llm = build_llm(primary, analysis_type=analysis_type)
     tools = mcp_tools_for_route(route or "operational")
+    if user_id:
+        tools = [*tools, *action_tools_for_route(route or "operational", user_id, conversation_id)]
 
     researcher = {
         "name": "researcher",
@@ -504,6 +509,33 @@ def _build_config(
     }
 
 
+def _extract_pending_actions(messages: list) -> list[dict]:
+    out: list[dict] = []
+    for m in messages:
+        if not isinstance(m, ToolMessage) or not m.content:
+            continue
+        text = m.content if isinstance(m.content, str) else str(m.content)
+        if "action_id" not in text:
+            continue
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            continue
+        aid = data.get("action_id")
+        if aid:
+            out.append(
+                {
+                    "id": aid,
+                    "action_type": data.get("action_type", ""),
+                    "summary": data.get("summary", ""),
+                    "risk": data.get("risk", "medium"),
+                    "status": data.get("status", "pending"),
+                    "expires_at": data.get("expires_at"),
+                }
+            )
+    return out
+
+
 async def _finalize_response(
     message: str,
     last_ai: str,
@@ -554,7 +586,7 @@ async def _finalize_response(
     )
     documents = attachment_docs or doc_names
 
-    return await build_mixed_response(
+    mixed = await build_mixed_response(
         message,
         body,
         api,
@@ -565,6 +597,10 @@ async def _finalize_response(
         documents=documents,
         has_attachments=bool(attachment_ids),
     )
+    pending = _extract_pending_actions(messages)
+    if pending:
+        mixed.pending_actions = pending
+    return mixed
 
 
 async def run_chat(
@@ -612,6 +648,8 @@ async def run_chat(
         route=route_decision.route,
         knowledge_mode=knowledge_mode,
         analysis_type=analysis_type,
+        user_id=user_id,
+        conversation_id=thread_id,
     )
     config = _build_config(thread_id, user_id, knowledge_mode, attachment_ids, route_decision, analysis_type)
     model = str(primary.get("model", "unknown"))
@@ -710,6 +748,8 @@ async def run_chat_stream(
         route=route_decision.route,
         knowledge_mode=knowledge_mode,
         analysis_type=analysis_type,
+        user_id=user_id,
+        conversation_id=thread_id,
     )
     config = _build_config(thread_id, user_id, knowledge_mode, attachment_ids, route_decision, analysis_type)
     model = str(primary.get("model", "unknown"))

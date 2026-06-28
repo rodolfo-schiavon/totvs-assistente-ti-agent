@@ -8,6 +8,7 @@ import { AgentMarkdown } from "./AgentMarkdown";
 import { AgentSourceBadge } from "./AgentSourceBadge";
 import { AgentTurnUsage } from "./AgentUsageBar";
 import { AgentAvatar } from "./AgentAvatar";
+import { PendingActionCard, type PendingActionItem } from "./PendingActionCard";
 import type { TokenUsage } from "@/lib/token-usage";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
@@ -32,6 +33,7 @@ type MixedResponse = {
   insights?: string[];
   data_limitations?: string | null;
   route?: string | null;
+  pending_actions?: PendingActionItem[];
 };
 
 function formatTime(iso?: string): string {
@@ -164,6 +166,9 @@ export function AgentMessage({
           ) : null}
           {!streaming ? (
             <AgentFollowUpSuggestions suggestions={mixed.follow_ups} onSelect={onFollowUpSelect} />
+          ) : null}
+          {!streaming && mixed.pending_actions?.length ? (
+            <PendingActionCard actions={mixed.pending_actions} />
           ) : null}
           {streaming ? (
             <span className="inline-block h-4 w-0.5 animate-pulse bg-[var(--color-accent-glow)]" aria-hidden />
