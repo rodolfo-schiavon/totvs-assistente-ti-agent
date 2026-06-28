@@ -177,7 +177,7 @@ export default function AdminKnowledgePage() {
         <div>
           <h1 className="text-xl font-semibold">Base de conhecimento</h1>
           <p className="text-sm text-[var(--color-muted)]">
-            Documentos indexados no VFS RAG 3.0 (/legal-kb/). Status <strong>synced</strong> = agente pode ler.
+            Documentos indexados no VFS RAG 3.0 (/platform-kb/). Status <strong>synced</strong> = agente pode ler.
           </p>
         </div>
         <Button type="button" variant="outline" disabled={syncing} onClick={syncVfs}>

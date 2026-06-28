@@ -14,7 +14,7 @@ from services.prompt_registry import (
     build_main_system_prompt,
     build_researcher_system_prompt,
 )
-from services.mcp_client import mcp_tools_for_route
+from services.mcp_client import build_mcp_preflight_context, mcp_tools_for_route
 from app.llm_provider import build_llm
 from app.schemas import MixedResponse, TokenUsageTurn
 from app.vfs_backend import KB_VFS_PATH, build_vfs_backend
@@ -108,13 +108,13 @@ def _enrich_for_analysis_type(
 ) -> str:
     if not attachment_ids:
         return enriched
-    if analysis_type in ("criacao_contrato", "minuta"):
+    if analysis_type in ("runbook", "recomendacoes"):
         return enriched + (
-            "\n\n[Instrução: produza a minuta/contrato COMPLETA diretamente na resposta em Markdown. "
-            "Inclua TODAS as cláusulas até o fim (disposições finais, foro, assinaturas). "
-            "Não pare no meio de uma seção. Use o conteúdo dos anexos acima. "
+            "\n\n[Instrução: produza o runbook ou checklist operacional COMPLETO diretamente na resposta em Markdown. "
+            "Inclua pré-requisitos, passos numerados, validações e rollback. "
+            "Use o conteúdo dos anexos acima quando relevante. "
             "NÃO use write_file/edit_file nem delegue ao researcher — "
-            "entregue o documento estruturado no texto da resposta, sem descrever etapas internas.]"
+            "entregue o procedimento estruturado no texto da resposta.]"
         )
     return enriched
 
@@ -165,12 +165,12 @@ def _extract_final_text(messages: list) -> str:
     return best_tool[:200_000].strip()
 
 
-_DOCUMENT_ANALYSIS_TYPES = frozenset({"criacao_contrato", "minuta", "revisao_juridica"})
+_DOCUMENT_ANALYSIS_TYPES = frozenset({"runbook", "recomendacoes", "diagnostico"})
 
 _CONTINUE_DOC_PROMPT = (
-    "A resposta anterior foi interrompida antes de concluir o documento. "
-    "Continue EXATAMENTE de onde parou — sem repetir cláusulas já escritas. "
-    "Complete todas as seções restantes até o fim (disposições finais, foro, assinaturas). "
+    "A resposta anterior foi interrompida antes de concluir o procedimento. "
+    "Continue EXATAMENTE de onde parou — sem repetir passos já escritos. "
+    "Complete todas as seções restantes até o fim (validação, rollback, referências). "
     "Entregue somente a continuação em Markdown."
 )
 
@@ -470,7 +470,7 @@ def _build_config(
 ) -> dict:
     tags = ["assistente-ti", "platform-agent", "rag:vfs3", f"route:{route_decision.route}"]
     recursion = AGENT_RECURSION_LIMIT
-    if attachment_ids or analysis_type in ("criacao_contrato", "minuta"):
+    if attachment_ids or analysis_type in ("runbook", "recomendacoes"):
         recursion = min(ATTACHMENT_RECURSION_LIMIT, AGENT_RECURSION_LIMIT)
     return {
         "configurable": {"thread_id": thread_id},
@@ -610,6 +610,8 @@ async def run_chat(
     enriched = await _enrich_for_documental(
         store, enriched, message, knowledge_mode, route_decision.route, attachment_ids
     )
+    if route_decision.route in ("operational", "analytical"):
+        enriched = enriched + build_mcp_preflight_context(route_decision.route)
 
     try:
         last_ai, messages = await asyncio.wait_for(
@@ -706,8 +708,10 @@ async def run_chat_stream(
     enriched = await _enrich_for_documental(
         store, enriched, message, knowledge_mode, route_decision.route, attachment_ids
     )
+    if route_decision.route in ("operational", "analytical"):
+        enriched = enriched + build_mcp_preflight_context(route_decision.route)
 
-    use_invoke_path = bool(attachment_ids) or analysis_type in ("criacao_contrato", "minuta")
+    use_invoke_path = bool(attachment_ids) or analysis_type in ("runbook", "recomendacoes")
     inputs: dict = {"messages": [HumanMessage(content=enriched)]}
     collected: list[str] = []
     final_messages: list = []

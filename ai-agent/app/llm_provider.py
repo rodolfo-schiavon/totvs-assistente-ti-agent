@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 
 DEFAULT_MAX_TOKENS = 16384
 DOCUMENT_MAX_TOKENS = 16384
-DOCUMENT_ANALYSIS_TYPES = frozenset({"criacao_contrato", "minuta", "revisao_juridica"})
+DOCUMENT_ANALYSIS_TYPES = frozenset({"runbook", "recomendacoes", "diagnostico"})
 
 
 def _gateway_enabled() -> bool:

@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "Assistente de TI — TOTVS AI Lab",
-  description: "Assistente jurídico interno com base de conhecimento e análise documental",
+  description: "Assistente DevOps/SRE com observabilidade, GitOps e base de runbooks da plataforma",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

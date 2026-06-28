@@ -24,7 +24,7 @@ export function AgentComposer({
   onAttach,
   loading,
   disabled,
-  placeholder = "Pergunte sobre contratos, cláusulas, riscos ou documentos… (Enter envia, Shift+Enter nova linha)",
+  placeholder = "Pergunte sobre cluster, Argo, métricas, logs ou runbooks… (Enter envia, Shift+Enter nova linha)",
   showAttach = false,
 }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);

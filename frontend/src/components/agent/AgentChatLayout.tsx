@@ -90,7 +90,7 @@ export function AgentChatLayout({
                   : "bg-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
               }`}
             >
-              {knowledgeMode ? "Modo documentos · ativo" : "Modo documentos"}
+              {knowledgeMode ? "Modo documentos · ativo" : "Modo ops · ativo (cluster/MCP)"}
             </button>
           ) : null}
         </div>

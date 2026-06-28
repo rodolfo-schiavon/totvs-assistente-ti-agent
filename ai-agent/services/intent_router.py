@@ -9,7 +9,7 @@ from typing import Literal
 RouteKind = Literal["operational", "analytical", "documental"]
 
 _OPS = re.compile(
-    r"\b(cluster|argo|deployment|pod|healthy|sa[uú]de|status|sync|outofsync|log|gateway|mlflow)\b",
+    r"\b(cluster|argo|deployment|pod|healthy|sa[uú]de|status|sync|outofsync|log|gateway|mlflow|recomenda)\b",
     re.I,
 )
 _METRICS = re.compile(

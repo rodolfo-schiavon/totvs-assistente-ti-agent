@@ -65,7 +65,7 @@ export const MODEL_CATALOG: ModelOption[] = [
     outputUsdPer1M: 15.0,
     contextK: 200,
     tier: "balanced",
-    description: "Recomendado para análise jurídica, contratos e minutas.",
+    description: "Recomendado para diagnósticos ops, runbooks e análises do cluster.",
   },
   {
     id: "claude-sonnet-4-6",
@@ -75,7 +75,7 @@ export const MODEL_CATALOG: ModelOption[] = [
     outputUsdPer1M: 15.0,
     contextK: 200,
     tier: "premium",
-    description: "Máxima qualidade para análises jurídicas complexas.",
+    description: "Máxima qualidade para incidentes complexos e relatórios técnicos.",
   },
   {
     id: "claude-haiku-4-5-20251001",
@@ -85,7 +85,7 @@ export const MODEL_CATALOG: ModelOption[] = [
     outputUsdPer1M: 5.0,
     contextK: 200,
     tier: "economy",
-    description: "Rápido para revisões e resumos de alto volume.",
+    description: "Rápido para triagem, resumos de logs e consultas de alto volume.",
   },
 ];
 
@@ -127,8 +127,8 @@ export const PROVIDER_SLOTS: {
   {
     id: "anthropic",
     label: "Anthropic",
-    role: "Agente jurídico",
-    description: "Chat, análises jurídicas e respostas do agente LangGraph.",
+    role: "Assistente de TI",
+    description: "Chat, diagnósticos DevOps/SRE e respostas do agente LangGraph.",
     defaultModel: "claude-sonnet-4-5-20250929",
     keyPlaceholder: "sk-ant-...",
   },

@@ -98,7 +98,7 @@ export default function LegalDashboardPage() {
       <Header title={orgView ? "Dashboard — visão consolidada" : "Dashboard"} compact />
       <p className="text-sm text-[var(--color-foreground-muted)]">
         {orgView
-          ? "Visão gerencial do assistente jurídico. Dados agregados — uso autorizado apenas."
+          ? "Visão gerencial do assistente de TI. Dados agregados — uso autorizado apenas."
           : "Seu uso pessoal do assistente. Conversas de outros usuários não são exibidas."}
       </p>
 

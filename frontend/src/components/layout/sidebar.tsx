@@ -8,7 +8,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   BookOpen,
-  Scale,
+  ServerCog,
   LogOut,
   Shield,
   MessageSquareText,
@@ -87,7 +87,7 @@ export function Sidebar() {
         )}
       >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-accent)]/15">
-          <Scale className="h-5 w-5 text-[var(--color-accent-glow)]" />
+          <ServerCog className="h-5 w-5 text-[var(--color-accent-glow)]" />
         </div>
         {!sidebarCollapsed ? (
           <div className="min-w-0">
@@ -95,7 +95,7 @@ export function Sidebar() {
               Assistente de TI
             </p>
             <p className="text-[10px] uppercase tracking-widest text-[var(--color-muted)]">
-              Assistente jurídico
+              DevOps · SRE · LLMOps
             </p>
           </div>
         ) : null}

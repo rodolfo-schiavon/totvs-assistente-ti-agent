@@ -1,5 +1,5 @@
 const DOC_CITATION_RE = /\[Doc:\s*([^\]]+)\]/gi;
-const VFS_INLINE_RE = /`?\/legal-kb\/[^`\s,)]+`?(?:\s*,?\s*linha\s+\d+)?/gi;
+const VFS_INLINE_RE = /`?\/platform-kb\/[^`\s,)]+`?(?:\s*,?\s*linha\s+\d+)?/gi;
 const TABLE_BLOCK_RE = /(^|\n)(\|.+\|\n\|[-:\s|]+\|\n(?:\|.+\|\n?)+)/g;
 
 export function extractDocCitations(content: string): string[] {

@@ -45,6 +45,38 @@ def _invoke(tool_name: str, payload: dict[str, Any] | None = None) -> str:
         return json.dumps(result, ensure_ascii=False, indent=2)
 
 
+_OPS_PREFLIGHT = (
+    "list_argo_applications",
+    "get_deployment_health",
+    "get_gateway_health",
+    "recommend_actions",
+)
+_ANALYTICAL_PREFLIGHT = (
+    "get_langfuse_project_stats",
+    "get_mlflow_experiments",
+    "get_gateway_health",
+)
+
+
+def build_mcp_preflight_context(route: str) -> str:
+    """Coleta snapshot read-only do ambiente para rotas ops/analytics."""
+    if route == "documental":
+        return ""
+    tools = _OPS_PREFLIGHT if route == "operational" else _ANALYTICAL_PREFLIGHT
+    sections: list[str] = []
+    for name in tools:
+        try:
+            result = _invoke(name, {})
+            sections.append(f"#### {name}\n{result[:8000]}")
+        except Exception as exc:
+            sections.append(f"#### {name}\n(erro ao consultar MCP: {exc})")
+    return (
+        "\n\n---\n**Snapshot operacional (platform-ops-mcp, somente leitura):**\n"
+        + "\n\n".join(sections)
+        + "\n---\nResponda com base nestes dados ao vivo. Cite apps Argo, deployments e métricas reais.\n"
+    )
+
+
 def mcp_tools_for_route(route: str) -> list[StructuredTool]:
     if route == "documental":
         return []

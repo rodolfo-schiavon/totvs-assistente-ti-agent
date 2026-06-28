@@ -46,7 +46,7 @@ export default defineConfig({
             PORT: "3000",
             API_URL: backendUrl,
             AI_AGENT_URL: process.env.AI_AGENT_URL || "http://localhost:8100",
-            NEXT_PUBLIC_APP_NAME: "Legal AI Workspace",
+            NEXT_PUBLIC_APP_NAME: "Assistente de TI — TOTVS AI Lab",
           },
         },
       ]

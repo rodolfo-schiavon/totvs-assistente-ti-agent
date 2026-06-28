@@ -17,18 +17,18 @@ import { useUiStore } from "@/store/ui-store";
 
 const ANALYSIS_TYPES = [
   { id: "geral", label: "Consulta geral" },
-  { id: "revisao_juridica", label: "Revisão jurídica" },
-  { id: "analise_riscos", label: "Análise de riscos" },
-  { id: "criacao_contrato", label: "Criação de contrato" },
-  { id: "resumo_executivo", label: "Resumo executivo" },
-  { id: "minuta", label: "Minuta preliminar" },
+  { id: "saude_cluster", label: "Saúde do cluster" },
+  { id: "diagnostico", label: "Diagnóstico de incidente" },
+  { id: "metricas", label: "Análise de métricas" },
+  { id: "runbook", label: "Runbook / procedimento" },
+  { id: "recomendacoes", label: "Recomendações ops" },
 ];
 
 const SUGGESTIONS = [
-  "Revise as cláusulas de confidencialidade deste contrato",
-  "Quais riscos jurídicos você identifica neste documento?",
-  "Resuma as obrigações das partes",
-  "Consultar modelos na base de conhecimento",
+  "Como está o cluster e o que você recomenda?",
+  "Liste as applications do Argo CD e o status de sync",
+  "Qual a latência P95 do gateway nos últimos 15 minutos?",
+  "Consultar runbooks na base de conhecimento",
 ];
 
 const ATTACHMENT_POLL_MS = 2000;
@@ -80,7 +80,7 @@ export function AgentChat() {
   const [sessionTurns, setSessionTurns] = useState(0);
   const [error, setError] = useState("");
   const [listRefresh, setListRefresh] = useState(0);
-  const [knowledgeMode, setKnowledgeMode] = useState(true);
+  const [knowledgeMode, setKnowledgeMode] = useState(false);
   const [analysisType, setAnalysisType] = useState("geral");
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -401,7 +401,7 @@ export function AgentChat() {
       <AgentChatLayout
         title={conversationTitle}
         subtitle={
-          conversationId ? "Thread ativa · memória persistente" : "Nova análise · contexto isolado"
+          conversationId ? "Thread ativa · memória persistente" : "Nova sessão · contexto isolado"
         }
         sessionUsage={sessionUsage}
         sessionTurns={sessionTurns}
@@ -451,7 +451,7 @@ export function AgentChat() {
             ) : null}
             <div className="flex flex-wrap items-center gap-2 border-t border-[var(--color-border)] px-4 py-2">
               <label className="text-xs text-[var(--color-muted)]" htmlFor="analysis-type">
-                Tipo de análise
+                Modo de consulta
               </label>
               <select
                 id="analysis-type"
@@ -490,7 +490,7 @@ export function AgentChat() {
             <div className="mx-auto flex w-full max-w-3xl flex-col items-center justify-center py-16">
               <p className="mb-1 text-lg font-medium">Como posso ajudar?</p>
               <p className="mb-8 max-w-md text-center text-sm text-[var(--color-muted)]">
-                Análises jurídicas assistidas por IA com consulta à base de documentos do escritório.
+                Assistente DevOps/SRE com acesso ao cluster, Argo CD, Prometheus, Langfuse e base de runbooks.
               </p>
               <div className="grid w-full max-w-lg gap-2 sm:grid-cols-2">
                 {SUGGESTIONS.map((s) => (
@@ -498,7 +498,7 @@ export function AgentChat() {
                     key={s}
                     type="button"
                     onClick={() => {
-                      if (s.includes("documentos")) setKnowledgeMode(true);
+                      if (s.includes("runbooks") || s.includes("conhecimento")) setKnowledgeMode(true);
                       sendMessage(s);
                     }}
                     disabled={loading}

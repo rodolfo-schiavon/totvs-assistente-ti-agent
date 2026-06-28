@@ -42,14 +42,14 @@ export default function ConsentPage() {
       <Card className="max-w-lg space-y-4 p-6">
         <h1 className="text-xl font-semibold">Aviso sobre uso da IA</h1>
         <p className="text-sm text-[var(--color-muted)]">
-          Antes de utilizar o assistente jurídico, leia atentamente:
+          Antes de utilizar o assistente de TI, leia atentamente:
         </p>
         <ul className="list-disc space-y-2 pl-5 text-sm text-[var(--color-foreground-muted)]">
-          <li>Este sistema é um assistente interno e <strong>não substitui advogados</strong>.</li>
-          <li>Toda saída da IA deve ser revisada por profissional responsável.</li>
-          <li>A IA pode cometer erros — valide leis, prazos e obrigações antes de utilizar.</li>
-          <li>Documentos confidenciais serão processados por provedores de IA configurados (BYOK).</li>
-          <li>Não insira dados desnecessários ou não autorizados para análise.</li>
+          <li>Este sistema é um <strong>assistente interno de operações</strong> e não substitui engenheiros on-call.</li>
+          <li>Toda recomendação da IA deve ser validada antes de mudanças em produção.</li>
+          <li>A IA pode cometer erros — confirme métricas, logs e status no Argo antes de agir.</li>
+          <li>Consultas operacionais usam integrações read-only (K8s, Prometheus, Langfuse, MLflow).</li>
+          <li>Não exponha credenciais, tokens ou dados sensíveis nas conversas.</li>
           <li>O uso é auditado (login, conversas, uploads e geração de respostas).</li>
         </ul>
         <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-border)] p-3 text-sm">

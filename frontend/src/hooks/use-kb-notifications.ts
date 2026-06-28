@@ -66,7 +66,7 @@ export function useKbStatusNotifications(
             id: `${d.id}-synced-${Date.now()}`,
             variant: "success",
             title: "Disponível para o agente",
-            message: `"${d.title}" sincronizado na base (/legal-kb/).`,
+            message: `"${d.title}" sincronizado na base (/platform-kb/).`,
           },
         ]);
       }

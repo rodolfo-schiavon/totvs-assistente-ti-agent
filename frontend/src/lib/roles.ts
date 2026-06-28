@@ -30,6 +30,6 @@ export function canViewManagementReports(role?: string | null): boolean {
 
 export const ROLE_LABELS: Record<LegalRole, string> = {
   admin: "Administrador",
-  advogado: "Advogado",
+  advogado: "Operador",
   gerencia: "Gerência",
 };
