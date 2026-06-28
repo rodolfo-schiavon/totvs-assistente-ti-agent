@@ -4,7 +4,7 @@ from app.vfs_backend import KB_VFS_PATH, PROJECT_NAMESPACE, store_namespace
 
 
 def test_project_namespace():
-    assert PROJECT_NAMESPACE == "legal-kb"
+    assert PROJECT_NAMESPACE == "platform-kb"
 
 
 def test_store_namespace_returns_tuple():
@@ -12,4 +12,4 @@ def test_store_namespace_returns_tuple():
 
 
 def test_kb_vfs_path_default():
-    assert KB_VFS_PATH.startswith("/legal-kb")
+    assert KB_VFS_PATH.startswith("/platform-kb")

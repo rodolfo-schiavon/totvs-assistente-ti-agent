@@ -5,7 +5,7 @@ from app.graph import _normalize_kb_message
 
 def test_normalize_generic_kb_message():
     msg = _normalize_kb_message("Conversar com documentos da base de conhecimento", True)
-    assert "/legal-kb/" in msg
+    assert "/platform-kb/" in msg
     assert "Liste" in msg
 
 
