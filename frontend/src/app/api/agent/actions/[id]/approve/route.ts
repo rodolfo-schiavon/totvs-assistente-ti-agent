@@ -3,15 +3,12 @@ import { backendFetch, clientContextHeaders, requireSession } from "@/lib/api-se
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function POST(_request: NextRequest, { params }: Params) {
-  const session = await requireSession();
-  if (!session) {
-    return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
-  }
+export async function POST(request: NextRequest, { params }: Params) {
+  await requireSession();
   const { id } = await params;
   const res = await backendFetch(`/api/v1/agent/actions/${id}/approve`, {
     method: "POST",
-    headers: clientContextHeaders(session),
+    headers: clientContextHeaders(request),
   });
   const data = await res.json().catch(() => ({}));
   return NextResponse.json(data, { status: res.status });
