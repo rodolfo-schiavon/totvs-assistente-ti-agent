@@ -13,6 +13,7 @@ from langgraph.errors import GraphRecursionError
 from services.prompt_registry import (
     build_main_system_prompt,
     build_researcher_system_prompt,
+    action_tools_prompt_suffix,
 )
 from services.action_broker_client import action_tools_for_route
 from services.mcp_client import build_mcp_preflight_context, mcp_tools_for_route
@@ -425,7 +426,7 @@ async def build_agent(
         "system_prompt": build_researcher_system_prompt(KB_VFS_PATH),
     }
 
-    system = build_main_system_prompt(kb_path=KB_VFS_PATH)
+    system = build_main_system_prompt(kb_path=KB_VFS_PATH) + action_tools_prompt_suffix(route)
     agent = create_deep_agent(
         model=llm,
         tools=tools,

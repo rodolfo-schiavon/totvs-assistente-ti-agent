@@ -59,6 +59,19 @@ def build_main_system_prompt(kb_path: str = "/platform-kb/") -> str:
     return f"{base}\n\nBase documental VFS: `{kb_path}`"
 
 
+def action_tools_prompt_suffix(route: str | None) -> str:
+    if route not in ("operational", "analytical"):
+        return ""
+    return (
+        "\n\n## Ações mutáveis (aprovação humana obrigatória)\n"
+        "Você TEM a ferramenta `propose_action` (não é MCP). Use-a para:\n"
+        "- rollout_restart (namespace + deployment)\n"
+        "- argo_refresh / argo_sync (app_name)\n"
+        "- workflow_dispatch (workflow)\n"
+        "Nunca diga que propose_action não está disponível — chame a ferramenta e informe que o usuário deve aprovar na UI.\n"
+    )
+
+
 def build_researcher_system_prompt(kb_path: str = "/platform-kb/") -> str:
     return f"{get_prompt('researcher')}\n\nPath: `{kb_path}`"
 
